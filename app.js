@@ -6,6 +6,7 @@ const bodyParser = require("body-parser");
 const passport = require("passport");
 const LocalStrategy = require("passport-local").Strategy;
 const User = require("./models/User");
+const jwt = require("jsonwebtoken");
 
 // Import database connection function
 const MongoDB = require("./utils/connect_db");
@@ -55,16 +56,33 @@ app.use(passport.session());
 // Import routes
 const registerRoute = require("./routes/register");
 const loginRoute = require("./routes/login");
-const forgotPassword = require("./routes/forgotPassword");
+// const forgotPassword = require("./routes/forgotPassword");
 
 // Use the imported routes
 app.use("/register", registerRoute);
 app.use("/login", loginRoute);
-app.use("/forgotPassword", forgotPassword);
+// app.use("/forgotPassword", forgotPassword);
 
 // Simple hello world endpoint
-app.get("/", (req, res) => {
-  res.send("Hello World!");
+app.post("/", (req, res) => {
+  const token = req.body.token;
+  console.log("Token is", token);
+
+  if (!token) {
+    return res.status(401).json({ message: "No token provided." });
+  }
+
+  jwt.verify(token, process.env.JWT_SECRET, (err, decoded) => {
+    if (err) {
+      return res.status(403).json({ message: "Failed to authenticate token." });
+    }
+
+    // Token is valid and decoded, now you can use the information in 'decoded'
+    res.json({
+      message: "Hello World!",
+      decoded: decoded,
+    });
+  });
 });
 
 // Start server
