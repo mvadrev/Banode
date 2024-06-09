@@ -3,8 +3,8 @@ const router = express.Router();
 const passport = require("passport");
 const jwt = require("jsonwebtoken");
 
-router.post("/", passport.authenticate("local"), (req, res) => {
-  const token = jwt.sign(
+router.post("/", passport.authenticate("local"), async (req, res) => {
+  const token = await jwt.sign(
     { id: req.user._id },
     process.env.JWT_SECRET, // Ensure this matches in your .env
     { expiresIn: "24h" } // Token expires in 24 hours
